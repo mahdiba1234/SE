@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DormHub - Complete Architecture Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0e1a;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        .c4-header {
+            background: linear-gradient(135deg, #0f1222 0%, #1a1f2e 100%);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 48px 24px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .c4-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 60%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .c4-header h1 {
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .c4-header p {
+            color: #94a3b8;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        .c4-badge {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(96, 165, 250, 0.15);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            margin-top: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .c4-nav {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px 16px;
+            background: #0f1222;
+            border-bottom: 1px solid #1e2438;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 14px;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            cursor: pointer;
+            border-radius: 40px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-btn {
+                padding: 10px 18px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .nav-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .nav-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .c4-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        @media (min-width: 768px) {
+            .c4-container {
+                padding: 32px 24px;
+            }
+        }
+
+        .c4-section {
+            background: #0f1222;
+            border-radius: 24px;
+            border: 1px solid #1e2438;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .c4-section-header {
+            background: linear-gradient(135deg, #13172a, #0b0e1a);
+            padding: 16px 20px;
+            border-bottom: 2px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        @media (min-width: 768px) {
+            .c4-section-header {
+                padding: 20px 28px;
+            }
+        }
+
+        .c4-level-badge {
+            background: #3b82f6;
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+
+        @media (min-width: 768px) {
+            .c4-level-badge {
+                width: 48px;
+                height: 48px;
+                font-size: 1.4rem;
+            }
+        }
+
+        .c4-level-title h2 {
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .c4-level-title p {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+
+        .diagram-content {
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        .diagram-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid #2d3a5e;
+            background: #1a1f30;
+            padding: 12px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .diagram-caption {
+            text-align: center;
+            margin-top: 12px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .code-preview {
+            background: #0a0e1a;
+            border-radius: 16px;
+            padding: 20px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.7rem;
+            overflow-x: auto;
+        }
+
+        @media (min-width: 768px) {
+            .code-preview {
+                padding: 24px;
+                font-size: 0.75rem;
+            }
+        }
+
+        .code-preview pre {
+            color: #e2e8f0;
+            white-space: pre;
+            font-family: 'Monaco', monospace;
+            line-height: 1.5;
+        }
+
+        .vision-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .vision-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .vision-content {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .vision-card {
+            background: #13172a;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2d3a5e;
+            transition: all 0.2s;
+        }
+
+        .vision-card:hover {
+            transform: translateY(-2px);
+            background: #1a1f30;
+        }
+
+        .vision-card h3 {
+            color: #60a5fa;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vision-card ul, .vision-card p {
+            color: #cbd5e1;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .vision-card ul {
+            padding-left: 20px;
+        }
+
+        .vision-card li {
+            margin-bottom: 8px;
+        }
+
+        .roles-grid-c4 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .roles-grid-c4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .roles-grid-c4 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .role-card-c4 {
+            background: #13172a;
+            border-radius: 20px;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.2s;
+        }
+
+        .role-card-c4:hover {
+            transform: translateY(-2px);
+            background: #1a1f30;
+        }
+
+        .role-card-c4 h4 {
+            color: #60a5fa;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .role-card-c4 p {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .c4-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            display: block;
+            overflow-x: auto;
+        }
+
+        @media (min-width: 768px) {
+            .c4-table {
+                font-size: 0.8rem;
+                display: table;
+            }
+        }
+
+        .c4-table th, .c4-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #1e2438;
+        }
+
+        @media (min-width: 768px) {
+            .c4-table th, .c4-table td {
+                padding: 12px 16px;
+            }
+        }
+
+        .c4-table th {
+            background: #1a1f30;
+            color: #a78bfa;
+            font-weight: 600;
+        }
+
+        .c4-table tr:hover {
+            background: #13172a;
+        }
+
+        .req-list-c4 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        @media (min-width: 640px) {
+            .req-list-c4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .req-list-c4 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .req-item-c4 {
+            background: #13172a;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-family: 'Monaco', monospace;
+            font-size: 0.75rem;
+            border: 1px solid #2d3a5e;
+            transition: all 0.2s;
+        }
+
+        .req-item-c4:hover {
+            background: #1a1f30;
+            border-color: #3b82f6;
+        }
+
+        .req-id-c4 {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .diagram-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 640px) {
+            .diagram-grid {
+                grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            }
+        }
+
+        .diagram-card {
+            background: #13172a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #2d3a5e;
+            transition: all 0.2s;
+        }
+
+        .diagram-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b82f6;
+        }
+
+        .diagram-card h3 {
+            color: #60a5fa;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .c4-footer {
+            text-align: center;
+            padding: 24px 16px;
+            border-top: 1px solid #1e2438;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        @media (min-width: 768px) {
+            .c4-footer {
+                padding: 32px;
+                font-size: 0.75rem;
+            }
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active-page {
+            display: block;
+        }
+
+        hr {
+            border-color: #1e2438;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="c4-header">
+    <h1>🏢 DormHub · Complete Architecture Documentation</h1>
+    <p>Smart Dormitory Management and Issue Tracking System — Phase 1</p>
+    <div class="c4-badge">
+        <span>✅ Vision & Scope</span>
+        <span>✅ 6 User Roles</span>
+        <span>✅ C1 Context</span>
+        <span>✅ C2 Containers</span>
+        <span>✅ C3 Components</span>
+        <span>✅ C4 Code</span>
+        <span>✅ Domain Class</span>
+        <span>✅ UML Diagrams</span>
+        <span>✅ 36 FR + 15 NFR</span>
+    </div>
+</div>
+
+<div class="c4-nav">
+    <button class="nav-btn active" data-page="vision">🎯 Vision</button>
+    <button class="nav-btn" data-page="roles">👥 Roles</button>
+    <button class="nav-btn" data-page="usecase">📋 Use Case</button>
+    <button class="nav-btn" data-page="c1">🌍 C1 Context</button>
+    <button class="nav-btn" data-page="c2">📦 C2 Containers</button>
+    <button class="nav-btn" data-page="c3">🧩 C3 Components</button>
+    <button class="nav-btn" data-page="domainclass">📐 Domain Class</button>
+    <button class="nav-btn" data-page="c4code">⌨️ C4 Code</button>
+    <button class="nav-btn" data-page="er">🗄️ ER Diagram</button>
+    <button class="nav-btn" data-page="state">🔄 State Machine</button>
+    <button class="nav-btn" data-page="deployment">🚀 Deployment</button>
+    <button class="nav-btn" data-page="activity">⚙️ Activities</button>
+    <button class="nav-btn" data-page="sequence">📡 Sequences</button>
+    <button class="nav-btn" data-page="functional">📝 FR</button>
+    <button class="nav-btn" data-page="nonfunctional">⚡ NFR</button>
+</div>
+
+<div class="c4-container">
+
+    <!-- ==================== VISION ==================== -->
+    <div id="vision-page" class="page active-page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">🎯</div>
+                <div class="c4-level-title">
+                    <h2>Vision Document</h2>
+                    <p>Project Name · Domain · Problem Statement · Vision · Scope</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="vision-content">
+                    <div class="vision-card">
+                        <h3>📌 Project Name</h3>
+                        <p><strong>DormHub</strong> – Smart Dormitory Management and Issue Tracking System</p>
+                        <h3 style="margin-top: 20px;">🏛️ Domain</h3>
+                        <p>Student housing management – maintenance requests, payments, user management, and  AI-powered document processing.</p>
+                    </div>
+                    <div class="vision-card">
+                        <h3>⚠️ Problem Statement</h3>
+                        <p>University dormitories manage student issues through paper forms, in-person visits, phone calls, or scattered messaging apps. This leads to lost requests, no transparency, delayed responses.</p>
+                        <h3 style="margin-top: 20px;">👁️ Vision</h3>
+                        <p>A web-based intelligent platform that digitizes and automates dormitory issue management using AI .</p>
+                    </div>
+                    <div class="vision-card">
+                        <h3>✅ Scope (Included)</h3>
+                        <ul>
+                            <li>Student registration and role-based login</li>
+                            <li>Submitting maintenance requests with images</li>
+                            <li>Tracking request status in real-time</li>
+                            <li>Support team reviewing and prioritizing requests</li>
+                            <li>Technician viewing assigned tasks</li>
+                            <li>Student final confirmation</li>
+                            <li>Manager viewing reports</li>
+                            <li>AI processing of documents</li>
+                            <li>Online payment</li>
+                            <li>2FA and activity logging</li>
+                        </ul>
+                    </div>
+                    <div class="vision-card">
+                        <h3>🚫 Scope (Not Included)</h3>
+                        <ul>
+                            <li>Real-time chat</li>
+                            <li>IoT/smart device integration</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== USER ROLES ==================== -->
+    <div id="roles-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">👥</div>
+                <div class="c4-level-title">
+                    <h2>User Roles (6 Roles)</h2>
+                    <p>RBAC implementation with role-based permissions</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="roles-grid-c4">
+                    <div class="role-card-c4"><h4>🎓 Student</h4><p>Submit issues, upload images, track requests, confirm resolution, pay fees.</p></div>
+                    <div class="role-card-c4"><h4>🔧 Technician</h4><p>View assigned requests, update status, log work details.</p></div>
+                    <div class="role-card-c4"><h4>🎧 Support</h4><p>Review requests, prioritize, assign to technicians.</p></div>
+                    <div class="role-card-c4"><h4>📊 Manager</h4><p>View all requests, generate reports, approve costs, upload documents for AI .</p></div>
+                    <div class="role-card-c4"><h4>👑 Admin</h4><p>Manage users, roles, settings, view logs.</p></div>
+                    <div class="role-card-c4"><h4>👀 Guest</h4><p>View public dormitory information (no login).</p></div>
+                </div>
+                <table class="c4-table">
+                    <thead><tr><th>Role</th><th>Access Level</th><th>Key Permissions</th></tr></thead>
+                    <tbody>
+                        <tr><td>Student</td><td>Low</td><td>Submit requests, upload images, track status, confirm, pay</td></tr>
+                        <tr><td>Technician</td><td>Low-Medium</td><td>View assigned requests, update status, add work notes</td></tr>
+                        <tr><td>Support</td><td>Medium</td><td>View all requests, prioritize, assign to technicians</td></tr>
+                        <tr><td>Manager</td><td>High</td><td>View reports, approve costs, upload docs for AI </td></tr>
+                        <tr><td>Admin</td><td>Full</td><td>Manage users, roles, system settings, view logs</td></tr>
+                        <tr><td>Guest</td><td>None</td><td>View only public dormitory info</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== USE CASE ==================== -->
+    <div id="usecase-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">📋</div>
+                <div class="c4-level-title">
+                    <h2>Use Case Diagram</h2>
+                    <p>System functionality from user perspective</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="Use Case Diagram.png" alt="Use Case Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 1: Use Case Diagram - Actors: Student, Technician, Support, Manager, Admin, Guest</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== C1 CONTEXT ==================== -->
+    <div id="c1-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">C1</div>
+                <div class="c4-level-title">
+                    <h2>System Context Diagram (Level 1)</h2>
+                    <p>Who uses the system? What external systems does it integrate with?</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="C1.png" alt="C1 Context Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 2: C1 Context Diagram - Actors and External Systems</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== C2 CONTAINERS ==================== -->
+    <div id="c2-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">C2</div>
+                <div class="c4-level-title">
+                    <h2>Container Diagram (Level 2)</h2>
+                    <p>High-level technology building blocks</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="C2.png" alt="C2 Container Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 3: C2 Container Diagram - SPA (React), API (Laravel 13), MySQL, Redis, Storage, External Services</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== C3 COMPONENTS ==================== -->
+    <div id="c3-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">C3</div>
+                <div class="c4-level-title">
+                    <h2>Component Diagram (Level 3)</h2>
+                    <p>Internal structure of the API Application</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="C3.png" alt="C3 Component Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 4: C3 Component Diagram - API Gateway, Controllers, Services, Data Access Layer</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DOMAIN CLASS DIAGRAM (UML) ==================== -->
+    <div id="domainclass-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">📐</div>
+                <div class="c4-level-title">
+                    <h2>Domain Class Diagram (UML)</h2>
+                    <p>UML class diagram showing domain entities and their relationships</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="Domain Class Diagram.png" alt="Domain Class Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 5: Domain Class Diagram - User, MaintenanceRequest, Payment, ActivityLog entities with UML relationships</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== C4 CODE LEVEL ==================== -->
+    <div id="c4code-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">⌨️</div>
+                <div class="c4-level-title">
+                    <h2>Code Level (Level 4) — Core Domain Models</h2>
+                    <p>Essential classes, attributes, methods, and relationships</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="code-preview">
+                    <pre>
+&lt;?php
+
+// ==================== ENUMS ====================
+
+enum Role
+{
+    case STUDENT;
+    case TECHNICIAN;
+    case SUPPORT;
+    case MANAGER;
+    case ADMIN;
+}
+
+enum RequestStatus
+{
+    case PENDING;      // waiting for support review
+    case IN_PROGRESS;  // assigned to technician
+    case COMPLETED;    // technician finished
+    case CONFIRMED;    // student confirmed
+}
+
+enum Priority
+{
+    case LOW;
+    case MEDIUM;
+    case HIGH;
+}
+
+// ==================== CLASS: User ====================
+
+class User
+{
+    private string $id;
+    private string $fullName;
+    private string $email;
+    private string $passwordHash;
+    private Role $role;
+    private ?string $roomNumber;
+    private bool $isActive;
+
+    public function register(string $email, string $password, string $fullName): User {}
+    public function login(string $email, string $password): string {}
+    public function sendOTP(string $email): void {}
+    public function verifyOTP(string $code): bool {}
+    public function hasPermission(string $action): bool {}
+}
+
+// ==================== CLASS: MaintenanceRequest ====================
+
+class MaintenanceRequest
+{
+    private string $id;
+    private string $trackingNumber;
+    private string $title;
+    private string $description;
+    private string $category;
+    private Priority $priority;
+    private RequestStatus $status;
+    private string $studentId;
+    private ?string $technicianId;
+    private array $imageUrls;
+    private ?string $workNotes;
+
+    public function submit(string $studentId, array $data): MaintenanceRequest {}
+    public function assign(string $technicianId): void {}
+    public function startProgress(): void {}
+    public function complete(string $notes): void {}
+    public function confirmByStudent(): void {}
+    public function addImage(string $url): void {}
+}
+
+// ==================== CLASS: Payment ====================
+
+class Payment
+{
+    private string $id;
+    private string $userId;
+    private float $amount;
+    private string $title;
+    private string $status;  // PENDING, PAID, FAILED
+    private ?string $transactionId;
+    private ?string $receiptUrl;
+
+    public function initiate(float $amount, string $title, string $userId): Payment {}
+    public function verify(string $transactionId): bool {}
+    public function generateReceipt(): string {}
+}
+
+// ==================== CLASS: ActivityLog ====================
+
+class ActivityLog
+{
+    private string $id;
+    private string $userId;
+    private string $action;
+    private string $ipAddress;
+    private \DateTime $createdAt;
+
+    public function log(string $userId, string $action, array $details, string $ipAddress): void {}
+    public function getLogs(array $filters): array {}
+}
+
+// ==================== RELATIONSHIPS ====================
+// User (1) ---- (*) MaintenanceRequest
+// MaintenanceRequest (1) ---- (1) Payment
+// User (1) ---- (*) ActivityLog
+                    </pre>
+                </div>
+                <div class="diagram-caption">Figure 6: C4 Code Level - Domain Models in PHP with core attributes and methods</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ER DIAGRAM ==================== -->
+    <div id="er-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">🗄️</div>
+                <div class="c4-level-title">
+                    <h2>ER Diagram</h2>
+                    <p>Database schema and relationships</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="ER Diagram.png" alt="ER Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 7: ER Diagram - Users, Requests, Payments, Logs tables</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== STATE MACHINE ==================== -->
+    <div id="state-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">🔄</div>
+                <div class="c4-level-title">
+                    <h2>State Machine Diagram</h2>
+                    <p>Maintenance Request Lifecycle</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="State Machine - Maintenance Request Lifecycle.png" alt="State Machine" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 8: State Machine - PENDING → IN_PROGRESS → COMPLETED → CONFIRMED</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== DEPLOYMENT ==================== -->
+    <div id="deployment-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">🚀</div>
+                <div class="c4-level-title">
+                    <h2>Deployment Diagram</h2>
+                    <p>Physical architecture and infrastructure</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <img src="Deployment Diagram.png" alt="Deployment Diagram" class="diagram-image" onerror="this.style.display='none'">
+                <div class="diagram-caption">Figure 9: Deployment Diagram - VPS, Docker, Nginx, Laravel 13, MySQL, Redis</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ACTIVITY DIAGRAMS ==================== -->
+    <div id="activity-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">⚙️</div>
+                <div class="c4-level-title">
+                    <h2>Activity Diagrams</h2>
+                    <p>Business process flows</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="diagram-grid">
+                    <div class="diagram-card">
+                        <h3>📝 Submit Maintenance Request</h3>
+                        <img src="Activity Diagrams/Activity Diagram - Submit Maintenance Request(Student).png" class="diagram-image" onerror="this.style.display='none'">
+                        <div class="diagram-caption">Student submits maintenance request with images</div>
+                    </div>
+                    <div class="diagram-card">
+                        <h3>🔧 Assignment to Confirmation</h3>
+                        <img src="Activity Diagrams/Activity Diagram -  Assignment to Confirmation Flow.png" class="diagram-image" onerror="this.style.display='none'">
+                        <div class="diagram-caption">Support assigns to technician, technician completes, student confirms</div>
+                    </div>
+                    <div class="diagram-card">
+                        <h3>🤖 AI Document Processing</h3>
+                        <img src="Activity Diagrams/Activity Diagram - AI Document Processing (student side).png" class="diagram-image" onerror="this.style.display='none'">
+                        <div class="diagram-caption">Manager uploads document → AI extracts data → auto-create request</div>
+                    </div>
+                    <div class="diagram-card">
+                        <h3>💳 Online Payment Flow</h3>
+                        <img src="Activity Diagrams/Activity Diagram - Online Payment Flow (Student).png" class="diagram-image" onerror="this.style.display='none'">
+                        <div class="diagram-caption">Student initiates payment → Gateway → Receipt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SEQUENCE DIAGRAMS ==================== -->
+    <div id="sequence-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">📡</div>
+                <div class="c4-level-title">
+                    <h2>Sequence Diagrams</h2>
+                    <p>Interaction flows between components</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="diagram-grid">
+                    <div class="diagram-card">
+                        <h3>📝 Submit Request (REST API)</h3>
+                        <img src="Sequence Diagrams/Sequence Diagram - Submit Maintenance Request (REST API).png" class="diagram-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="diagram-card">
+                        <h3>👨‍🔧 Assign Request to Technician</h3>
+                        <img src="Sequence Diagrams/Sequence Diagram - Assign Request to Technician (Support).png" class="diagram-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="diagram-card">
+                        <h3>🔧 Technician Completes Request</h3>
+                        <img src="Sequence Diagrams/Sequence Diagram - Technician Completes Request.png" class="diagram-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="diagram-card">
+                        <h3>✅ Student Final Confirmation</h3>
+                        <img src="Sequence Diagrams/Sequence Diagram - Student Final Confirmation.png" class="diagram-image" onerror="this.style.display='none'">
+                    </div>
+                    <div class="diagram-card">
+                        <h3>🤖 AI  Document Processing</h3>
+                        <img src="Sequence Diagrams/Sequence Diagram - AI Document Processing (Student).png" class="diagram-image" onerror="this.style.display='none'">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FUNCTIONAL REQUIREMENTS ==================== -->
+    <div id="functional-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">📝</div>
+                <div class="c4-level-title">
+                    <h2>Functional Requirements</h2>
+                    <p>FR-01 to FR-36</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <div class="req-list-c4">
+                    <div class="req-item-c4"><span class="req-id-c4">FR-01</span> Register with email & password</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-02</span> Send OTP for 2FA</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-03</span> Require OTP for login</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-04</span> RBAC implementation</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-05</span> Role-based restrictions</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-06</span> Submit maintenance request</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-07</span> Upload up to 3 images</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-08</span> View own requests</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-09</span> Real-time status tracking</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-10</span> Email notifications</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-11</span> Student confirmation</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-12</span> Request history</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-13</span> Online payment</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-14</span> Support view pending</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-15</span> Set priority</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-16</span> Assign to technician</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-17</span> Notify technician</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-18</span> Technician view tasks</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-19</span> Start progress</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-20</span> Complete request</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-21</span> Add work notes</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-22</span> Manager filter requests</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-23</span> Generate reports</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-24</span> Approve costs</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-25</span> Upload for AI</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-26</span> Admin manage users</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-27</span> System settings</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-28</span> View logs</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-29</span> Send to AI API</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-30</span> Extract data via AI</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-31</span> Auto-create request</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-32</span> Log user actions</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-33</span> Store logs</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-34</span> Payment gateway</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-35</span> Generate receipt</div>
+                    <div class="req-item-c4"><span class="req-id-c4">FR-36</span> Guest view</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== NON-FUNCTIONAL REQUIREMENTS ==================== -->
+    <div id="nonfunctional-page" class="page">
+        <div class="c4-section">
+            <div class="c4-section-header">
+                <div class="c4-level-badge">⚡</div>
+                <div class="c4-level-title">
+                    <h2>Non-Functional Requirements</h2>
+                    <p>NFR-01 to NFR-15</p>
+                </div>
+            </div>
+            <div class="diagram-content">
+                <table class="c4-table">
+                    <thead><tr><th>ID</th><th>Category</th><th>Requirement</th></tr></thead>
+                    <tbody>
+                        <tr><td>NFR-01</td><td>Performance</td><td>Page load time under 3 seconds</td></tr>
+                        <tr><td>NFR-02</td><td>Performance</td><td>API response under 500ms for 95% of requests</td></tr>
+                        <tr><td>NFR-03</td><td>Security</td><td>Passwords hashed (bcrypt)</td></tr>
+                        <tr><td>NFR-04</td><td>Security</td><td>All endpoints except login/register require auth</td></tr>
+                        <tr><td>NFR-05</td><td>Security</td><td>OTP codes expire after 5 minutes</td></tr>
+                        <tr><td>NFR-06</td><td>Security</td><td>File uploads: max 5MB, jpg/png only</td></tr>
+                        <tr><td>NFR-07</td><td>Usability</td><td>Responsive design (desktop, tablet, mobile)</td></tr>
+                        <tr><td>NFR-08</td><td>Usability</td><td>UI in Persian (Farsi)</td></tr>
+                        <tr><td>NFR-09</td><td>Reliability</td><td>99% uptime during active hours</td></tr>
+                        <tr><td>NFR-10</td><td>Maintainability</td><td>SOLID principles</td></tr>
+                        <tr><td>NFR-11</td><td>Maintainability</td><td>70% code coverage for critical APIs</td></tr>
+                        <tr><td>NFR-12</td><td>Availability</td><td>Handle 100+ concurrent users</td></tr>
+                        <tr><td>NFR-13</td><td>Compliance</td><td>RFC 7807 error handling</td></tr>
+                        <tr><td>NFR-14</td><td>Documentation</td><td>Swagger API documentation</td></tr>
+                        <tr><td>NFR-15</td><td>Logging</td><td>Logs retained for 6 months</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="c4-footer">
+        <p><strong>DormHub</strong> — Smart Dormitory Management System</p>
+        <p>Computer Engineering Department | Semester 2, 1405-1406</p>
+        <p>Complete Documentation | Vision | SRS | C4 Model | UML Diagrams | 36 FR + 15 NFR</p>
+    </div>
+</div>
+
+<script>
+    const pageIds = ['vision', 'roles', 'usecase', 'c1', 'c2', 'c3', 'domainclass', 'c4code', 'er', 'state', 'deployment', 'activity', 'sequence', 'functional', 'nonfunctional'];
+    const navBtns = document.querySelectorAll('.nav-btn');
+    
+    function showPage(pageId) {
+        pageIds.forEach(id => {
+            const el = document.getElementById(`${id}-page`);
+            if (el) el.classList.remove('active-page');
+        });
+        const target = document.getElementById(`${pageId}-page`);
+        if (target) target.classList.add('active-page');
+        
+        navBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.page === pageId) {
+                btn.classList.add('active');
+            }
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = btn.dataset.page;
+            if (page) showPage(page);
+        });
+    });
+</script>
+</body>
+</html>
